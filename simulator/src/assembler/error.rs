@@ -4,7 +4,7 @@ use crate::assembler::lexer::Token;
 pub enum ParseError {
     #[error("Unexpected token")]
     UnexpectedToken {
-        pos: (u8, u8),
+        pos: (usize, usize),
         expected: Vec<Token>,
         found: Token,
     },
@@ -16,8 +16,16 @@ pub enum ParseError {
 pub enum LexerError {
     #[error("Unexpected Symbol")]
     UnexpectedSymbol {
-        pos: (u8, u8),
+        pos: (usize, usize),
         expected: String,
         found: char,
     },
+    #[error("Lexeme is not a valid token")]
+    InvalidToken {
+        pos: (usize, usize),
+        expected: Vec<String>,
+        found: String,
+    },
+    #[error("Malformed expression: Failed to parse integer")]
+    IntegerParseError { pos: (usize, usize), lexeme: String },
 }
