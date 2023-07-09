@@ -1,11 +1,13 @@
 use crate::assembler::lexer::Token;
 
+use super::lexer::TokenType;
+
 #[derive(thiserror::Error, Debug)]
 pub enum ParseError {
     #[error("Unexpected token")]
     UnexpectedToken {
         pos: (usize, usize),
-        expected: Vec<Token>,
+        expected: Vec<TokenType>,
         found: Token,
     },
     #[error(transparent)]

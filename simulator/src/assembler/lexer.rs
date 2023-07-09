@@ -5,6 +5,7 @@ use super::error::LexerError;
 #[allow(dead_code)]
 #[derive(Debug, PartialEq)]
 pub enum Mnemonic {
+    Any,
     Adc,
     And,
     Asl,
@@ -76,12 +77,18 @@ pub enum Register {
 
 #[allow(dead_code)]
 #[derive(Debug, PartialEq)]
-pub enum Token {
+pub enum TokenType {
     Immediate(u16),
     Numeral(u16),
     Mnemonic(Mnemonic),
     Register(Register),
     Comma,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Token {
+    pub pos: (usize, usize),
+    pub token_type: TokenType,
 }
 
 fn seek_till<T: PartialEq>(target: T, iter: &mut Iter<T>) -> usize {
@@ -106,8 +113,18 @@ fn make_token(lexeme: &str, position: (usize, usize)) -> Result<Token, LexerErro
     if lexeme.starts_with("$") {
         match u16::from_str_radix(&lexeme[1..], 16) {
             Ok(number) => match immediate {
-                true => return Ok(Token::Immediate(number)),
-                false => return Ok(Token::Numeral(number)),
+                true => {
+                    return Ok(Token {
+                        token_type: TokenType::Immediate(number),
+                        pos: position,
+                    })
+                }
+                false => {
+                    return Ok(Token {
+                        token_type: TokenType::Numeral(number),
+                        pos: position,
+                    })
+                }
             },
             Err(_) => {
                 return Err(LexerError::IntegerParseError {
@@ -119,8 +136,18 @@ fn make_token(lexeme: &str, position: (usize, usize)) -> Result<Token, LexerErro
     } else if lexeme.starts_with("%") {
         match u16::from_str_radix(&lexeme[1..], 2) {
             Ok(number) => match immediate {
-                true => return Ok(Token::Immediate(number)),
-                false => return Ok(Token::Numeral(number)),
+                true => {
+                    return Ok(Token {
+                        token_type: TokenType::Immediate(number),
+                        pos: position,
+                    })
+                }
+                false => {
+                    return Ok(Token {
+                        token_type: TokenType::Numeral(number),
+                        pos: position,
+                    })
+                }
             },
             Err(_) => {
                 return Err(LexerError::IntegerParseError {
@@ -132,8 +159,18 @@ fn make_token(lexeme: &str, position: (usize, usize)) -> Result<Token, LexerErro
     } else if (b'0'..b'9').contains(&lexeme.as_bytes()[0]) {
         match u16::from_str_radix(&lexeme, 10) {
             Ok(number) => match immediate {
-                true => return Ok(Token::Immediate(number)),
-                false => return Ok(Token::Numeral(number)),
+                true => {
+                    return Ok(Token {
+                        token_type: Token::Immediate(number),
+                        pos: position,
+                    })
+                }
+                false => {
+                    return Ok(Token {
+                        token_type: Token::Numeral(number),
+                        pos: position,
+                    })
+                }
             },
             Err(_) => {
                 return Err(LexerError::IntegerParseError {
@@ -144,68 +181,254 @@ fn make_token(lexeme: &str, position: (usize, usize)) -> Result<Token, LexerErro
         }
     } else {
         let token = match lexeme {
-            "ADC" => Ok(Token::Mnemonic(Mnemonic::Adc)),
-            "AND" => Ok(Token::Mnemonic(Mnemonic::And)),
-            "ASL" => Ok(Token::Mnemonic(Mnemonic::Asl)),
-            "BCC" => Ok(Token::Mnemonic(Mnemonic::Bcc)),
-            "BCS" => Ok(Token::Mnemonic(Mnemonic::Bcs)),
-            "BEQ" => Ok(Token::Mnemonic(Mnemonic::Beq)),
-            "BIT" => Ok(Token::Mnemonic(Mnemonic::Bit)),
-            "BMI" => Ok(Token::Mnemonic(Mnemonic::Bmi)),
-            "BNE" => Ok(Token::Mnemonic(Mnemonic::Bne)),
-            "BPL" => Ok(Token::Mnemonic(Mnemonic::Bpl)),
-            "BRK" => Ok(Token::Mnemonic(Mnemonic::Brk)),
-            "BVC" => Ok(Token::Mnemonic(Mnemonic::Bvc)),
-            "BVS" => Ok(Token::Mnemonic(Mnemonic::Bvs)),
-            "CLC" => Ok(Token::Mnemonic(Mnemonic::Clc)),
-            "CLD" => Ok(Token::Mnemonic(Mnemonic::Cld)),
-            "CLI" => Ok(Token::Mnemonic(Mnemonic::Cli)),
-            "CLV" => Ok(Token::Mnemonic(Mnemonic::Clv)),
-            "CMP" => Ok(Token::Mnemonic(Mnemonic::Cmp)),
-            "CPX" => Ok(Token::Mnemonic(Mnemonic::Cpx)),
-            "CPY" => Ok(Token::Mnemonic(Mnemonic::Cpy)),
-            "DEC" => Ok(Token::Mnemonic(Mnemonic::Dec)),
-            "DEX" => Ok(Token::Mnemonic(Mnemonic::Dex)),
-            "DEY" => Ok(Token::Mnemonic(Mnemonic::Dey)),
-            "EOR" => Ok(Token::Mnemonic(Mnemonic::Eor)),
-            "INC" => Ok(Token::Mnemonic(Mnemonic::Inc)),
-            "INX" => Ok(Token::Mnemonic(Mnemonic::Inx)),
-            "INY" => Ok(Token::Mnemonic(Mnemonic::Iny)),
-            "JMP" => Ok(Token::Mnemonic(Mnemonic::Jmp)),
-            "JSR" => Ok(Token::Mnemonic(Mnemonic::Jsr)),
-            "LDA" => Ok(Token::Mnemonic(Mnemonic::Lda)),
-            "LDX" => Ok(Token::Mnemonic(Mnemonic::Ldx)),
-            "LDY" => Ok(Token::Mnemonic(Mnemonic::Ldy)),
-            "LSR" => Ok(Token::Mnemonic(Mnemonic::Lsr)),
-            "NOP" => Ok(Token::Mnemonic(Mnemonic::Nop)),
-            "ORA" => Ok(Token::Mnemonic(Mnemonic::Ora)),
-            "PHA" => Ok(Token::Mnemonic(Mnemonic::Pha)),
-            "PHP" => Ok(Token::Mnemonic(Mnemonic::Php)),
-            "PLA" => Ok(Token::Mnemonic(Mnemonic::Pla)),
-            "ROL" => Ok(Token::Mnemonic(Mnemonic::Rol)),
-            "ROR" => Ok(Token::Mnemonic(Mnemonic::Ror)),
-            "RTI" => Ok(Token::Mnemonic(Mnemonic::Rti)),
-            "RTS" => Ok(Token::Mnemonic(Mnemonic::Rts)),
-            "SBC" => Ok(Token::Mnemonic(Mnemonic::Sbc)),
-            "SEC" => Ok(Token::Mnemonic(Mnemonic::Sec)),
-            "SED" => Ok(Token::Mnemonic(Mnemonic::Sed)),
-            "SEI" => Ok(Token::Mnemonic(Mnemonic::Sei)),
-            "STA" => Ok(Token::Mnemonic(Mnemonic::Sta)),
-            "STX" => Ok(Token::Mnemonic(Mnemonic::Stx)),
-            "STY" => Ok(Token::Mnemonic(Mnemonic::Sty)),
-            "TAX" => Ok(Token::Mnemonic(Mnemonic::Tax)),
-            "TAY" => Ok(Token::Mnemonic(Mnemonic::Tay)),
-            "TSX" => Ok(Token::Mnemonic(Mnemonic::Tsx)),
-            "TSY" => Ok(Token::Mnemonic(Mnemonic::Tsy)),
-            "TXA" => Ok(Token::Mnemonic(Mnemonic::Txa)),
-            "TXS" => Ok(Token::Mnemonic(Mnemonic::Txs)),
-            "TYA" => Ok(Token::Mnemonic(Mnemonic::Tya)),
-            "PC" => Ok(Token::Register(Register::Pc)),
-            "AC" => Ok(Token::Register(Register::Ac)),
-            "X" => Ok(Token::Register(Register::X)),
-            "Y" => Ok(Token::Register(Register::Y)),
-            "SR" => Ok(Token::Register(Register::Sr)),
-            "SP" => Ok(Token::Register(Register::Sp)),
+            "ADC" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Adc),
+                pos: position,
+            }),
+            "AND" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::And),
+                pos: position,
+            }),
+            "ASL" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Asl),
+                pos: position,
+            }),
+            "BCC" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Bcc),
+                pos: position,
+            }),
+            "BCS" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Bcs),
+                pos: position,
+            }),
+            "BEQ" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Beq),
+                pos: position,
+            }),
+            "BIT" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Bit),
+                pos: position,
+            }),
+            "BMI" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Bmi),
+                pos: position,
+            }),
+            "BNE" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Bne),
+                pos: position,
+            }),
+            "BPL" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Bpl),
+                pos: position,
+            }),
+            "BRK" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Brk),
+                pos: position,
+            }),
+            "BVC" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Bvc),
+                pos: position,
+            }),
+            "BVS" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Bvs),
+                pos: position,
+            }),
+            "CLC" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Clc),
+                pos: position,
+            }),
+            "CLD" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Cld),
+                pos: position,
+            }),
+            "CLI" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Cli),
+                pos: position,
+            }),
+            "CLV" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Clv),
+                pos: position,
+            }),
+            "CMP" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Cmp),
+                pos: position,
+            }),
+            "CPX" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Cpx),
+                pos: position,
+            }),
+            "CPY" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Cpy),
+                pos: position,
+            }),
+            "DEC" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Dec),
+                pos: position,
+            }),
+            "DEX" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Dex),
+                pos: position,
+            }),
+            "DEY" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Dey),
+                pos: position,
+            }),
+            "EOR" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Eor),
+                pos: position,
+            }),
+            "INC" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Inc),
+                pos: position,
+            }),
+            "INX" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Inx),
+                pos: position,
+            }),
+            "INY" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Iny),
+                pos: position,
+            }),
+            "JMP" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Jmp),
+                pos: position,
+            }),
+            "JSR" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Jsr),
+                pos: position,
+            }),
+            "LDA" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Lda),
+                pos: position,
+            }),
+            "LDX" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Ldx),
+                pos: position,
+            }),
+            "LDY" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Ldy),
+                pos: position,
+            }),
+            "LSR" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Lsr),
+                pos: position,
+            }),
+            "NOP" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Nop),
+                pos: position,
+            }),
+            "ORA" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Ora),
+                pos: position,
+            }),
+            "PHA" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Pha),
+                pos: position,
+            }),
+            "PHP" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Php),
+                pos: position,
+            }),
+            "PLA" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Pla),
+                pos: position,
+            }),
+            "ROL" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Rol),
+                pos: position,
+            }),
+            "ROR" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Ror),
+                pos: position,
+            }),
+            "RTI" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Rti),
+                pos: position,
+            }),
+            "RTS" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Rts),
+                pos: position,
+            }),
+            "SBC" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Sbc),
+                pos: position,
+            }),
+            "SEC" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Sec),
+                pos: position,
+            }),
+            "SED" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Sed),
+                pos: position,
+            }),
+            "SEI" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Sei),
+                pos: position,
+            }),
+            "STA" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Sta),
+                pos: position,
+            }),
+            "STX" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Stx),
+                pos: position,
+            }),
+            "STY" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Sty),
+                pos: position,
+            }),
+            "TAX" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Tax),
+                pos: position,
+            }),
+            "TAY" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Tay),
+                pos: position,
+            }),
+            "TSX" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Tsx),
+                pos: position,
+            }),
+            "TSY" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Tsy),
+                pos: position,
+            }),
+            "TXA" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Txa),
+                pos: position,
+            }),
+            "TXS" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Txs),
+                pos: position,
+            }),
+            "TYA" => Ok(Token {
+                token_type: Token::Mnemonic(Mnemonic::Tya),
+                pos: position,
+            }),
+            "PC" => Ok(Token {
+                token_type: Token::Register(Register::Pc),
+                pos: position,
+            }),
+            "AC" => Ok(Token {
+                token_type: Token::Register(Register::Ac),
+                pos: position,
+            }),
+            "X" => Ok(Token {
+                token_type: Token::Register(Register::X),
+                pos: position,
+            }),
+            "Y" => Ok(Token {
+                token_type: Token::Register(Register::Y),
+                pos: position,
+            }),
+            "SR" => Ok(Token {
+                token_type: Token::Register(Register::Sr),
+                pos: position,
+            }),
+            "SP" => Ok(Token {
+                token_type: Token::Register(Register::Sp),
+                pos: position,
+            }),
             _ => Err(LexerError::InvalidToken {
                 pos: position,
                 expected: vec![
