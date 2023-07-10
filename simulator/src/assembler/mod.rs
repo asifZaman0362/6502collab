@@ -4,24 +4,25 @@ pub mod error;
 pub mod lexer;
 
 use error::ParseError;
-use lexer::Token;
+use lexer::{Token, TokenType};
 
 use self::lexer::Mnemonic;
 
 pub fn assemble(src: &str) -> Result<Bytes, error::ParseError> {
-    let mut tokens = lexer::get_tokens(src)?.iter();
+    let tokens = lexer::get_tokens(src)?;
+    let mut iter = tokens.iter();
     let bytes = BytesMut::with_capacity(2048);
     loop {
-        match tokens.next() {
-            Some(token) => match token {
-                Token::Mnemonic(mnemonic) => {}
+        return match iter.next() {
+            Some(token) => match &token.token_type {
+                TokenType::Mnemonic(mnemonic) => Ok(Bytes::new()),
                 _ => Err(ParseError::UnexpectedToken {
                     pos: token.pos,
                     expected: (vec![TokenType::Mnemonic(Mnemonic::Any)]),
-                    found: token,
+                    found: token.clone(),
                 }),
             },
             None => Ok(bytes.into()),
-        }
+        };
     }
 }

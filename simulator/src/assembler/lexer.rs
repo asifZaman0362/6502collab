@@ -3,7 +3,7 @@ use core::slice::Iter;
 use super::error::LexerError;
 
 #[allow(dead_code)]
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Mnemonic {
     Any,
     Adc,
@@ -65,7 +65,7 @@ pub enum Mnemonic {
 }
 
 #[allow(dead_code)]
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Register {
     Pc,
     Ac,
@@ -76,7 +76,7 @@ pub enum Register {
 }
 
 #[allow(dead_code)]
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum TokenType {
     Immediate(u16),
     Numeral(u16),
@@ -85,7 +85,7 @@ pub enum TokenType {
     Comma,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Token {
     pub pos: (usize, usize),
     pub token_type: TokenType,
@@ -161,13 +161,13 @@ fn make_token(lexeme: &str, position: (usize, usize)) -> Result<Token, LexerErro
             Ok(number) => match immediate {
                 true => {
                     return Ok(Token {
-                        token_type: Token::Immediate(number),
+                        token_type: TokenType::Immediate(number),
                         pos: position,
                     })
                 }
                 false => {
                     return Ok(Token {
-                        token_type: Token::Numeral(number),
+                        token_type: TokenType::Numeral(number),
                         pos: position,
                     })
                 }
@@ -182,251 +182,251 @@ fn make_token(lexeme: &str, position: (usize, usize)) -> Result<Token, LexerErro
     } else {
         let token = match lexeme {
             "ADC" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Adc),
+                token_type: TokenType::Mnemonic(Mnemonic::Adc),
                 pos: position,
             }),
             "AND" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::And),
+                token_type: TokenType::Mnemonic(Mnemonic::And),
                 pos: position,
             }),
             "ASL" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Asl),
+                token_type: TokenType::Mnemonic(Mnemonic::Asl),
                 pos: position,
             }),
             "BCC" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Bcc),
+                token_type: TokenType::Mnemonic(Mnemonic::Bcc),
                 pos: position,
             }),
             "BCS" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Bcs),
+                token_type: TokenType::Mnemonic(Mnemonic::Bcs),
                 pos: position,
             }),
             "BEQ" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Beq),
+                token_type: TokenType::Mnemonic(Mnemonic::Beq),
                 pos: position,
             }),
             "BIT" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Bit),
+                token_type: TokenType::Mnemonic(Mnemonic::Bit),
                 pos: position,
             }),
             "BMI" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Bmi),
+                token_type: TokenType::Mnemonic(Mnemonic::Bmi),
                 pos: position,
             }),
             "BNE" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Bne),
+                token_type: TokenType::Mnemonic(Mnemonic::Bne),
                 pos: position,
             }),
             "BPL" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Bpl),
+                token_type: TokenType::Mnemonic(Mnemonic::Bpl),
                 pos: position,
             }),
             "BRK" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Brk),
+                token_type: TokenType::Mnemonic(Mnemonic::Brk),
                 pos: position,
             }),
             "BVC" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Bvc),
+                token_type: TokenType::Mnemonic(Mnemonic::Bvc),
                 pos: position,
             }),
             "BVS" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Bvs),
+                token_type: TokenType::Mnemonic(Mnemonic::Bvs),
                 pos: position,
             }),
             "CLC" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Clc),
+                token_type: TokenType::Mnemonic(Mnemonic::Clc),
                 pos: position,
             }),
             "CLD" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Cld),
+                token_type: TokenType::Mnemonic(Mnemonic::Cld),
                 pos: position,
             }),
             "CLI" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Cli),
+                token_type: TokenType::Mnemonic(Mnemonic::Cli),
                 pos: position,
             }),
             "CLV" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Clv),
+                token_type: TokenType::Mnemonic(Mnemonic::Clv),
                 pos: position,
             }),
             "CMP" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Cmp),
+                token_type: TokenType::Mnemonic(Mnemonic::Cmp),
                 pos: position,
             }),
             "CPX" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Cpx),
+                token_type: TokenType::Mnemonic(Mnemonic::Cpx),
                 pos: position,
             }),
             "CPY" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Cpy),
+                token_type: TokenType::Mnemonic(Mnemonic::Cpy),
                 pos: position,
             }),
             "DEC" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Dec),
+                token_type: TokenType::Mnemonic(Mnemonic::Dec),
                 pos: position,
             }),
             "DEX" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Dex),
+                token_type: TokenType::Mnemonic(Mnemonic::Dex),
                 pos: position,
             }),
             "DEY" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Dey),
+                token_type: TokenType::Mnemonic(Mnemonic::Dey),
                 pos: position,
             }),
             "EOR" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Eor),
+                token_type: TokenType::Mnemonic(Mnemonic::Eor),
                 pos: position,
             }),
             "INC" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Inc),
+                token_type: TokenType::Mnemonic(Mnemonic::Inc),
                 pos: position,
             }),
             "INX" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Inx),
+                token_type: TokenType::Mnemonic(Mnemonic::Inx),
                 pos: position,
             }),
             "INY" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Iny),
+                token_type: TokenType::Mnemonic(Mnemonic::Iny),
                 pos: position,
             }),
             "JMP" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Jmp),
+                token_type: TokenType::Mnemonic(Mnemonic::Jmp),
                 pos: position,
             }),
             "JSR" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Jsr),
+                token_type: TokenType::Mnemonic(Mnemonic::Jsr),
                 pos: position,
             }),
             "LDA" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Lda),
+                token_type: TokenType::Mnemonic(Mnemonic::Lda),
                 pos: position,
             }),
             "LDX" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Ldx),
+                token_type: TokenType::Mnemonic(Mnemonic::Ldx),
                 pos: position,
             }),
             "LDY" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Ldy),
+                token_type: TokenType::Mnemonic(Mnemonic::Ldy),
                 pos: position,
             }),
             "LSR" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Lsr),
+                token_type: TokenType::Mnemonic(Mnemonic::Lsr),
                 pos: position,
             }),
             "NOP" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Nop),
+                token_type: TokenType::Mnemonic(Mnemonic::Nop),
                 pos: position,
             }),
             "ORA" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Ora),
+                token_type: TokenType::Mnemonic(Mnemonic::Ora),
                 pos: position,
             }),
             "PHA" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Pha),
+                token_type: TokenType::Mnemonic(Mnemonic::Pha),
                 pos: position,
             }),
             "PHP" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Php),
+                token_type: TokenType::Mnemonic(Mnemonic::Php),
                 pos: position,
             }),
             "PLA" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Pla),
+                token_type: TokenType::Mnemonic(Mnemonic::Pla),
                 pos: position,
             }),
             "ROL" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Rol),
+                token_type: TokenType::Mnemonic(Mnemonic::Rol),
                 pos: position,
             }),
             "ROR" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Ror),
+                token_type: TokenType::Mnemonic(Mnemonic::Ror),
                 pos: position,
             }),
             "RTI" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Rti),
+                token_type: TokenType::Mnemonic(Mnemonic::Rti),
                 pos: position,
             }),
             "RTS" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Rts),
+                token_type: TokenType::Mnemonic(Mnemonic::Rts),
                 pos: position,
             }),
             "SBC" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Sbc),
+                token_type: TokenType::Mnemonic(Mnemonic::Sbc),
                 pos: position,
             }),
             "SEC" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Sec),
+                token_type: TokenType::Mnemonic(Mnemonic::Sec),
                 pos: position,
             }),
             "SED" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Sed),
+                token_type: TokenType::Mnemonic(Mnemonic::Sed),
                 pos: position,
             }),
             "SEI" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Sei),
+                token_type: TokenType::Mnemonic(Mnemonic::Sei),
                 pos: position,
             }),
             "STA" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Sta),
+                token_type: TokenType::Mnemonic(Mnemonic::Sta),
                 pos: position,
             }),
             "STX" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Stx),
+                token_type: TokenType::Mnemonic(Mnemonic::Stx),
                 pos: position,
             }),
             "STY" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Sty),
+                token_type: TokenType::Mnemonic(Mnemonic::Sty),
                 pos: position,
             }),
             "TAX" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Tax),
+                token_type: TokenType::Mnemonic(Mnemonic::Tax),
                 pos: position,
             }),
             "TAY" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Tay),
+                token_type: TokenType::Mnemonic(Mnemonic::Tay),
                 pos: position,
             }),
             "TSX" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Tsx),
+                token_type: TokenType::Mnemonic(Mnemonic::Tsx),
                 pos: position,
             }),
             "TSY" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Tsy),
+                token_type: TokenType::Mnemonic(Mnemonic::Tsy),
                 pos: position,
             }),
             "TXA" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Txa),
+                token_type: TokenType::Mnemonic(Mnemonic::Txa),
                 pos: position,
             }),
             "TXS" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Txs),
+                token_type: TokenType::Mnemonic(Mnemonic::Txs),
                 pos: position,
             }),
             "TYA" => Ok(Token {
-                token_type: Token::Mnemonic(Mnemonic::Tya),
+                token_type: TokenType::Mnemonic(Mnemonic::Tya),
                 pos: position,
             }),
             "PC" => Ok(Token {
-                token_type: Token::Register(Register::Pc),
+                token_type: TokenType::Register(Register::Pc),
                 pos: position,
             }),
             "AC" => Ok(Token {
-                token_type: Token::Register(Register::Ac),
+                token_type: TokenType::Register(Register::Ac),
                 pos: position,
             }),
             "X" => Ok(Token {
-                token_type: Token::Register(Register::X),
+                token_type: TokenType::Register(Register::X),
                 pos: position,
             }),
             "Y" => Ok(Token {
-                token_type: Token::Register(Register::Y),
+                token_type: TokenType::Register(Register::Y),
                 pos: position,
             }),
             "SR" => Ok(Token {
-                token_type: Token::Register(Register::Sr),
+                token_type: TokenType::Register(Register::Sr),
                 pos: position,
             }),
             "SP" => Ok(Token {
-                token_type: Token::Register(Register::Sp),
+                token_type: TokenType::Register(Register::Sp),
                 pos: position,
             }),
             _ => Err(LexerError::InvalidToken {
